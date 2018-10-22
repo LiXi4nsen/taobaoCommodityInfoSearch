@@ -1,0 +1,356 @@
+﻿import lao;
+import lao.tao;
+import console;
+import time;
+import inet.url
+import web.json
+import web.mshtml
+namespace lao.tao.get
+
+//淘宝单品信息
+getItem = function(commodityID){
+    var commodityID = tostring(commodityID);
+	var httpProject = ..lao.httpFun()
+	var fatherUrl = ..string.concat("https://unzbyunacs.m.taobao.com/h5/mtop.taobao.detail.getdetail/6.0/?appKey=12574478&api=mtop.taobao.detail.getdetail&v=6.0&ttid=2016%40taobao_h5_2.0.0&isSec=0&ecode=0&AntiFlood=true&AntiCreep=true&H5Request=true&type=jsonp&dataType=jsonp&data=%7B%22exParams%22%3A%22%7B%5C%22id%5C%22%3A%5C%",commodityID,"%5C%22%7D%22%2C%22itemNumId%22%3A%22",commodityID,"%22%7D");
+	var jsonHtml = httpProject.get(fatherUrl)
+	var jsonTable = ..web.json.parse(jsonHtml)
+	var faTable = {}
+	var	commodity = {
+			查询时间 = ..time.now();
+			宝贝ID = commodityID;
+			标题 = jsonTable.data.item.title;
+			销量 = ..string.match(jsonTable.data.apiStack[1].value, """sellCount""\:""(\d+)""");
+			评价数 = jsonTable.data.item.commentCount;
+			收藏数 = jsonTable.data.item.favcount;
+			店铺名 = jsonTable.data.seller.shopName;
+			旺旺ID = jsonTable.data.seller.sellerNick;
+			粉丝数 = jsonTable.data.seller.fans;
+			商品数 = jsonTable.data.seller.shopCard;
+			店铺类型 = jsonTable.data.seller.shopType;
+			开店时间 = jsonTable.data.seller.starts;
+		}
+	//var	commodity = {}
+	//commodity.查询时间 = ..time.now()
+	
+	..table.push(faTable, commodity) 
+	
+	..console.dumpJson(faTable)
+
+	return faTable;
+}
+	
+	
+var resultGet = function(keyWord){
+	var httpProject = ..lao.httpFun();
+	var uKeyWord = ..inet.url.encode(keyWord);
+	var targetUrl = ..string.concat("https://suggest.taobao.com/sug?code=utf-8&q=", uKeyWord, "&k=1&area=c2c&bucketid=20");
+	var jsonHtml = httpProject.get(targetUrl);
+	var targetWordTable = ..web.json.parse(jsonHtml);
+	return targetWordTable;
+};	
+	
+	
+//淘宝关键词挖掘
+taobaoKeywordDig = function(rootKeyWord){
+
+	var faTable = {};
+	
+	for (k, v in resultGet(rootKeyWord).result){
+		var keyList = {};
+
+		keyList.root = rootKeyWord;
+		keyList.key = v[1];
+		keyList.comeFrom = "下拉词";
+		keyList.level = 1;
+		
+		..table.push(faTable, keyList);
+
+		for (kk, vv in resultGet(v[1]).result){
+			var keyList2 = {};
+			keyList2.root = v[1];
+			keyList2.key = vv[1];
+			keyList2.comeFrom = "下拉词";
+			keyList2.level = 2;
+			
+			..table.push(faTable, keyList2);
+		};
+	};
+	
+	return faTable; 
+	..console.dumpJson(faTable);
+}
+
+
+var resultGet1688 = function(keyWord){
+	var httpProject = ..lao.httpFun();
+	//var uKeyWord = ..inet.url.encode(keyWord,0);
+	var targetUrl = ..string.concat("https://suggest.1688.com/bin/suggest?cookieId=&type=offer&industryFlag=&q=", keyWord, "&ver=2&encode=gbk", "&_=1536081772323");
+	var jsonHtml = httpProject.get(targetUrl);
+	var jsonData = ..string.replace(jsonHtml,"var\s\_suggest\_result\_\=","");
+	var jsonData2 = ..string.replace(jsonData, "@_", "");
+	var jsonData3 = ..string.replace(jsonData2, "@%", "");
+	var jsonRealData = ..string.fromto(jsonData3,0,65001);
+	var targetWordTable = ..web.json.parse(jsonRealData);
+	return targetWordTable;
+}
+
+
+//1688关键词挖掘
+
+digKeyWord1688 = function(keyWord){
+	var faTable = {};
+	
+	for (k, v in resultGet1688(keyWord).result){
+		var keyList = {};
+		
+		keyList.root = keyWord;
+		keyList.key = v.q
+		keyList.comeFrom = "下拉词";
+		keyList.level = 1;
+		
+		..table.push(faTable, keyList);
+
+		for (kk, vv in resultGet1688(v.q).result){
+			var keyList2 = {};
+			
+			keyList2.root = v.q;
+			keyList2.key = v.q ++ vv.q;
+			keyList2.comeFrom = "下拉词";
+			keyList2.level = 2;
+			
+			..table.push(faTable, keyList2);
+			
+			for (kkk, vvv in vv){
+				for (kkkk, vvvv in resultGet1688(v.q ++ vv.q).result){
+					var keyList3 = {};
+				
+					keyList3.root = vv.q;
+					keyList3.key = v.q ++ vvvv.q;
+					keyList3.comeFrom = "下拉词";
+					keyList3.level = 2;
+					
+					..table.push(faTable, keyList3);
+				};	
+			};
+		};
+	};
+	..console.dumpJson(faTable);
+	return faTable; 		
+}
+
+
+//创建评论url池，获取最大页数
+var getCommentID = function(Url, page=1){
+	var http = ..lao.httpFun();
+	//接受商品链接并取出商品ID(commodityID)
+	var commodityID = ..string.match(Url, "id=(\d+)&");
+	//拼接评论链接，当前页数默认为1
+	var commentUrl = ..string.concat("https://rate.tmall.com/list_detail_rate.htm?itemId=", tostring(commodityID), "&sellerId=123456", "&order=3&currentPage=", page, "&pageSize=10");
+	var commentJson =  ..web.json.parse(http.get(commentUrl));
+	var commentTable = {};
+	var maxPage = page;
+	
+	for (k,comment in commentJson.rateDetail.rateList){
+		var newTable = {};
+		newTable.nickName = comment.displayUserNick;
+		newTable.userVIP = comment.goldUser;
+		newTable.sku = comment.auctionSku;
+		newTable.rateDate = comment.rateDate;
+		newTable.rateContent = comment.rateContent;
+		newTable.appendComment = comment.appendComment;
+		newTable.reply = comment.reply;
+		
+		if (page = 1){
+			maxPage = commentJson.rateDetail.paginator.lastPage;
+		};
+		
+		..table.push(commentTable, newTable);	
+	};
+	..console.dumpJson(commentTable)
+	return commentTable, maxPage;
+};
+
+
+//淘宝单品评价查询
+getTaobaoComment = function(url){
+	var page = 1;
+	var faTable = {};
+	
+	var table, maxPage = getCommentID(url, i);
+	page = maxPage;
+	for (number, comment in table){
+		..table.push(faTable, comment);
+	}
+	for (i=2;page;1){
+
+		var table, maxPage = getCommentID(url, i);
+		for (number, comment in table){
+			..table.push(faTable, comment);
+		}
+		..console.log(..string.replace("第d页搜索完成", "d", i));
+	};
+	..console.dumpJson(faTable)
+	return faTable;
+};
+
+//单页面下载格式化数据
+taobaoSearch = function(keyWord, searcType, page, isNew, globalbuy, shopType, location, low, high){
+	//var client = ..lao.clientFun();
+	var http = ..lao.httpFun();
+	var uKeyWord = ..inet.url.encode(keyWord, 65001, 0);
+	// 拼接url
+	//如果输入商铺类型不为空，则自动转换为天猫
+	if(shopType != ""){
+		shopType = "&filter_tianmao=tmall";
+	};
+	//如果输入海外商品不为空，则自动转换为海外商品
+	if(globalbuy != ""){
+		globalbuy = "&globalbuy=1";
+	};
+	//如果输入新品不为空，则自动转换为新品
+	if(isNew != ""){
+		isNew = "&auction_tag%5B%5D=1154";;
+	};
+	var searchURL = ..string.concat("https://s.taobao.com/search?data-key=s&data-value=", (page-1)*44+1, "&ajax=true&_ksTS=1536203850187_720&callback=jsonp920&q=", uKeyWord, searchType, globalbuy, shopType, isNew);	
+	var dataHtml = http.get(searchURL);
+	..console.log(searchURL)
+	//var dataJson = ..web.json.parse(dataHtml);
+	// 当页面数据下载失败时，循环下载直至成功为止
+	//..console.dumpJson(type(dataJson));
+	while(dataHtml==""){
+		dataHtml = http.get(searchURL);
+		..sleep(1000);
+		..console.log("请求中");
+	};
+	// 获取页面商品数量
+	var dataJson = ..web.json.parse(dataHtml);
+	var pageNumber = ..table.len(dataJson.mods.itemlist.data.auctions);
+	
+	var faTable = {};
+	// 根据页面商品数量循环格式化数据
+	for (i=1;pageNumber;1){
+		var phoneList = dataJson.mods.itemlist.data.auctions;
+		var newTable = {};
+		newTable.keyWord = keyWord;
+		newTable.searchTime = ..time.now();
+		newTable.page = dataJson.mods.pager.data.currentPage;
+		newTable.number = (tonumber(dataJson.mods.pager.data.currentPage) - 1) * 48 + i;
+		//..console.log(dataJson.mods.itemlist.data.auctions[i]);
+		newTable.url = ..string.concat("https:", phoneList[i].detail_url);
+		newTable.pic_url = ..string.concat("https://s.taobao.com/:", phoneList[i].pic_url);
+		newTable.title = phoneList[i].title;
+		newTable.id = phoneList[i].nid;
+		newTable.sellerCount = ..string.match(phoneList[i].view_sales, "(\d+)");
+		newTable.price = phoneList[i].view_price;
+		newTable.salesAmount = tonumber(newTable.price) * tonumber(newTable.sellerCount);
+		newTable.carriage = "";
+		newTable.commentCount = phoneList[i].comment_count;
+		newTable._class = "";
+		newTable.itemLocation = phoneList[i].item_loc;
+		newTable.shopNick = phoneList[i].nick;
+		if (tostring(phoneList[i].shopcard.isTmall) == true){
+			newTable.shopType = "天猫"
+		}
+		else {
+			newTable.shopType = "淘宝"
+		}
+		newTable.shopCredit = phoneList[i].shopcard.sellerCredit;
+		newTable.shopDelivery = phoneList[i].shopcard.delivery[1];
+		newTable.shopDescription = phoneList[i].shopcard.description[1];
+		newTable.shopService = phoneList[i].shopcard.service[1];
+		//newTable.shopGroundingTime = ..string.match(http.get(newTable.url), "<li title=""&nbsp;2017年冬季"">上市年份季节:&nbsp;*+(\d+)</li>");
+		
+		//562912264617
+		//https://cloud.video.taobao.com/play/u/3287104402/p/1/e/6/t/1/50199826102.mp4
+		//https://tbm-auth.alicdn.com/c6PaYt4sejnmToiHDyd/HzYBKMJn69VgUMe4wss@@hd_hq.mp4?auth_key=1536287350-0-0-30825fd5c267d87668db356cd69beac9
+		..table.push(faTable, newTable);
+		// 判断如果商品价格在用户输入价格区间内，则放入返回数据中
+		if (tonumber(newTable.price) >= low and tonumber(newTable.price) <= high){
+			if (location == true and newTable.itemLocation == location){
+				..table.push(faTable, newTable);
+			};
+		};	
+	};
+	return faTable;
+};
+
+// 多页排名数据爬取  keyWord(关键词)，searchType(排序方式), page(查询页数), low(价格区间最小值), high(价格区间最大值), location(地域名 如"浙江 杭州",
+// shopType("是否只搜天猫(tmall/0)")), globalbuy(是否仅搜索海外商品,(1/0)), isNew(是否搜索新品(0/auction_tag%5B%5D=1154))
+getPagesData = function(keyWord, searchType, page=1, low=0, high=999999999, location, shopType, globalbuy, isNew){
+    var faTable = {};
+    
+    ..console.log(shopType)
+    
+    var pages = tonumber(page)
+    
+    if (searchType == "综合排序"){
+    	searchType = "commend";
+    }
+    elseif (searchType == "价格排序"){
+    	searchType = "price-asc";
+    }
+    else {
+    	searchType = "sale-desc";
+    }
+    
+    if (shopType == "否"){
+    	shopType = ""
+    }
+    else {
+    	shopType = "1"
+    }
+    
+    if (globalbuy == "否"){
+    	globalbuy = ""
+    }
+    else {
+    	globalbuy = "1"
+    }
+    
+    if (isNew == "否"){
+    	isNew = ""
+    }
+    else {
+    	isNew = "1"
+    }
+    
+    
+    ..console.log(shopType, globalbuy, isNew)
+	for(i=1;pages;1){
+		// 循环调用页面搜索函数
+		var newTable = taobaoSearch(keyWord, searcType, page, isNew, globalbuy, shopType, location, low="", high="");
+		for(number, tables in newTable){
+			..table.push(faTable, tables);
+		}
+	};
+	return faTable;
+};
+
+
+
+//蘑菇街单页搜索(未完成)
+searchMGJ = function(keyWord, sortType="pop", pages, low="", high=""){
+	var http = ..lao.httpFun();
+	var targetUrl = ..string.concat("http://list.mogujie.com/search?callback=&_version=1&&sort=", sortType, "&cpc_offset=&cKey=43", "&page=", pages,"&q=", ..inet.url.encode(keyWord), "&maxPrice=", low, "&minPrice=", high);
+	var dataHtml = http.get(targetUrl);
+	dataHtml = ..string.replace(dataHtml, "@/**/", "");
+	dataHtml = ..string.replace(dataHtml, "@;", "");
+	var dataJson = ..web.json.parse(dataHtml);
+	var faTable = {};
+	var result = dataJson.result.wall.docs;
+	for(i=1;75;1){
+		faTable.number = i + 1;
+		faTable.title = result[i].title;
+		faTable.url = ..string.concat("https:", result[i].link);
+		..console.log(faTable.url);
+		faTable.collect = result[i].cfav;
+		faTable.orgPrice = result[i].orgPrice;
+		faTable.price = result[i].price;
+		var htmlProject = (http.get(faTable.url));
+		..console.log(htmlProject);
+		
+		//..console.log(faTable.)
+                          
+	};
+};
+

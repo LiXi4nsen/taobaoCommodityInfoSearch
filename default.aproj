@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project ver="10" name="同行数据采集" libEmbed="true" icon="..." ui="win" output="同行数据采集.exe" CompanyName="单位名称" FileDescription="同行数据采集" LegalCopyright="Copyright (C) 单位名称 2018" ProductName="同行数据采集" InternalName="同行数据采集" FileVersion="0.0.0.05" ProductVersion="0.0.0.05" publishDir="/Publish/" dstrip="false">
+	<file name="main.aardio" path="main.aardio" comment="main.aardio"/>
+	<folder name="资源文件" path="res" embed="true"/>
+	<folder name="carl" path="carl" comment="carl">
+		<file name="http.aardio" path="carl\http.aardio" comment="carl\http.aardio"/>
+		<file name="log.aardio" path="carl\log.aardio" comment="carl\log.aardio"/>
+		<file name="mssql.aardio" path="carl\mssql.aardio" comment="carl\mssql.aardio"/>
+		<file name="mysql.aardio" path="carl\mysql.aardio" comment="carl\mysql.aardio"/>
+		<file name="oracle.aardio" path="carl\oracle.aardio" comment="carl\oracle.aardio"/>
+		<file name="processcmd.aardio" path="carl\processcmd.aardio" comment="carl\processcmd.aardio"/>
+		<file name="rsa.aardio" path="carl\rsa.aardio" comment="carl\rsa.aardio"/>
+		<file name="session.aardio" path="carl\session.aardio" comment="carl\session.aardio"/>
+		<file name="sql.aardio" path="carl\sql.aardio" comment="carl\sql.aardio"/>
+		<file name="update.aardio" path="carl\update.aardio" comment="carl\update.aardio"/>
+		<file name="_.aardio" path="carl\_.aardio" comment="carl\_.aardio"/>
+		<folder name="ctrl" path="carl\ctrl" comment="carl\ctrl">
+			<file name="comboboxex.aardio" path="carl\ctrl\comboboxex.aardio" comment="carl\ctrl\comboboxex.aardio"/>
+			<file name="listviewex.aardio" path="carl\ctrl\listviewex.aardio" comment="carl\ctrl\listviewex.aardio"/>
+			<file name="page.aardio" path="carl\ctrl\page.aardio" comment="carl\ctrl\page.aardio"/>
+			<file name="pagectrl.aardio" path="carl\ctrl\pagectrl.aardio" comment="carl\ctrl\pagectrl.aardio"/>
+			<file name="pageSort.aardio" path="carl\ctrl\pageSort.aardio" comment="carl\ctrl\pageSort.aardio"/>
+			<file name="select.aardio" path="carl\ctrl\select.aardio" comment="carl\ctrl\select.aardio"/>
+			<file name="tab.aardio" path="carl\ctrl\tab.aardio" comment="carl\ctrl\tab.aardio"/>
+			<file name="toolbar.aardio" path="carl\ctrl\toolbar.aardio" comment="carl\ctrl\toolbar.aardio"/>
+			<file name="treeviewex.aardio" path="carl\ctrl\treeviewex.aardio" comment="carl\ctrl\treeviewex.aardio"/>
+			<file name="_.aardio" path="carl\ctrl\_.aardio" comment="carl\ctrl\_.aardio"/>
+		</folder>
+		<folder name="report" path="carl\report" comment="carl\report">
+			<file name="template.aardio" path="carl\report\template.aardio" comment="carl\report\template.aardio"/>
+			<file name="_.aardio" path="carl\report\_.aardio" comment="carl\report\_.aardio"/>
+		</folder>
+		<folder name="rpc" path="carl\rpc" comment="carl\rpc">
+			<file name="client.aardio" path="carl\rpc\client.aardio" comment="carl\rpc\client.aardio"/>
+			<file name="server.aardio" path="carl\rpc\server.aardio" comment="carl\rpc\server.aardio"/>
+			<file name="_.aardio" path="carl\rpc\_.aardio" comment="carl\rpc\_.aardio"/>
+		</folder>
+	</folder>
+	<folder name="lao" path="lao" comment="lao">
+		<file name="main.aardio" path="lao\main.aardio" comment="lao\main.aardio"/>
+		<file name="amazon.aardio" path="lao\amazon.aardio" comment="lao\amazon.aardio"/>
+		<file name="vipShop.aardio" path="lao\vipShop.aardio" comment="lao\vipShop.aardio"/>
+		<file name="ymatou.aardio" path="lao\ymatou.aardio" comment="lao\ymatou.aardio"/>
+		<file name="_.aardio" path="lao\_.aardio" comment="lao\_.aardio"/>
+		<folder name="tao" path="lao\tao" comment="lao\tao">
+			<file name="get.aardio" path="lao\tao\get.aardio" comment="lao\tao\get.aardio"/>
+			<file name="lookupItem.aardio" path="lao\tao\lookupItem.aardio" comment="lao\tao\lookupItem.aardio"/>
+			<file name="_.aardio" path="lao\tao\_.aardio" comment="lao\tao\_.aardio"/>
+		</folder>
+	</folder>
+</project>

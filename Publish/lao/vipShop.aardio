@@ -1,0 +1,158 @@
+﻿import lao;
+import lao.tao;
+import console;
+import time;
+import inet.url
+import web.json
+import web.mshtml
+namespace lao.vipShop
+
+
+//获取类目信息，返回嵌套的类目表
+categoryGet = function(){
+    //类目ID
+    var categoryList = {26594;26595;26596;26598;26599;26600;26601;26602;27916;31553;31333;83774;73140;75044;96552;105274;269646;288532;288533};
+    //类目表
+    var categoryTable = {};
+	var http = ..lao.httpFun();
+	//循环获取嵌套的类目信息
+	for (k, v in categoryList){
+		var htmlUrl = ..string.concat("https://category.vip.com/ajax/getTreeList.php?cid=",v,"&tree_id=109");
+		var dataHtml = http.get(htmlUrl);
+		var dataJson = ..web.json.parse(dataHtml);
+		var newTable = {};
+		newTable.cateName = dataJson.data[tostring(v)][1].cate_name;
+		newTable.cateID = dataJson.data[tostring(v)][1].cateid;
+		newTable.url = dataJson.data[tostring(v)][1].url;
+		newTable.children = {};
+		
+		for (kk, vv in dataJson.data[tostring(v)][1].children){
+			var newTable2 = {};
+			newTable2.cateID = vv.cate_id;
+			newTable2.cateName = vv.cate_name;
+			newTable2.url = vv.url;
+			newTable2.children = {};
+			
+			for (kkk, vvv in vv.children){
+				var newTable3 = {};
+				newTable3.cateID = vvv.cate_id;
+				newTable3.cateName = vvv.cate_name;
+				newTable3.url = vvv.url;
+				..table.push(newTable2.children ,newTable3);
+			};
+			..table.push(newTable.children ,newTable2);
+		};
+	..table.push(categoryTable, newTable);
+	
+	};
+//..console.dumpJson(categoryTable);
+return categoryTable;
+};
+
+//获取商品ID，返回类目下商品信息表
+getCommodityIds = function(keyWord, dataHtml){
+    
+	var http = ..lao.httpFun();
+	var commodityIds = ..web.json.parse(..string.match(dataHtml, """productIds""\:(.+?),""cateName"""));
+	//拼接IDs参数，传入URL
+	var ids = "";
+	var commodityTable = {};
+	for (i=1;45;1){
+		ids = ids ++ commodityIds[i];
+		ids = ids ++ ",";
+	};
+	
+	var dataUrl = ..string.concat("https://category.vip.com/ajax/mapi.php?service=product_info&callback=categoryMerchandiseInfo1&productIds=", ..inet.url.encode(ids),"&functions=brandShowName,surprisePrice,pcExtra&warehouse=VIP_NH&mobile_platform=1&app_name=shop_pc&app_version=4.0&mars_cid=1536825041151_9d528a8f100d02dfb7c11878e38c6e6e&fdc_area_id=104104103&_=1536838847072");
+	var dataJson = ..web.json.parse(..string.replace(http.get(dataUrl), "categoryMerchandiseInfo1", ""));
+	//循环获取单品信息
+	for (i=1;45;1){
+		var newTable4 = {};
+		newTable4.time = ..time.now();
+		newTable4.number = i;
+		newTable4.title = dataJson.data.products[i].productName;
+		newTable4.id = dataJson.data.products[i].productId;
+		newTable4.url = ..string.concat("https://detail.vip.com/detail-3493110-", newTable4.id,".html");
+		newTable4.brandShowName = dataJson.data.products[i].brandShowName;
+		newTable4.disCount = dataJson.data.products[i].vipDiscount;
+		newTable4.marketPrice = dataJson.data.products[i].marketPrice;
+		newTable4.vipShopPrice = dataJson.data.products[i].vipshopPrice;
+		newTable4.brandName = dataJson.data.products[i].brandName;
+		
+		..table.push(commodityTable, newTable4);
+	};
+	return commodityTable;
+};
+
+
+//控制器，循环判断用户输入关键词是否在商品类目中，并获取该类目下的商品信息
+//商品类目共嵌套三层
+//返回搜索结果表
+commodityGet = function(keyWord){
+	var categoryTable = categoryGet();
+	var http = ..lao.httpFun();
+	var faTable = {}
+	
+	for (k, v in categoryTable){
+		if (v.cateName == keyWord){
+			var dataHtml = http.get(..string.concat("https://category.vip.com/", v.url));
+			faTable = getCommodityIds(keyWord, dataHtml);
+		}
+		else {
+			for (kk, vv in v.children){
+				if (vv.cateName == keyWord){
+					var dataHtml = http.get(..string.concat("https://category.vip.com/", vv.url));
+					faTable = getCommodityIds(keyWord, dataHtml);
+				};
+				else {
+					for (kkk, vvv in vv.children){
+						if (vvv.cateName == keyWord){
+							var dataHtml = http.get(..string.concat("https://category.vip.com/", vvv.url));
+							faTable = getCommodityIds(keyWord, dataHtml);
+						}
+					};
+				};
+			};
+		};
+	};
+	..console.dumpJson(faTable);
+	return faTable;
+};
+
+
+//唯品会关键词挖掘
+//单词搜索
+keyWordSearch = function(keyWord, level){
+	var http = ..lao.httpFun();
+	var targetUrl = ..string.concat("http://category.vip.com/ajax/getSuggest.php?callback=searchSuggestions&warehouse=&keyword=", ..inet.url.encode(keyWord), "&_=1537154668065");
+	var dataHtml = http.get(targetUrl);
+	dataHtml = ..string.replace(dataHtml, "searchSuggestions", "");
+	var dataJson = ..web.json.parse(dataHtml);
+	var faTable = {};
+	for (i=1;..table.len(dataJson.data);1){
+		var newTable = {};
+		newTable.root = keyWord;
+		newTable.key = dataJson.data[i].word;
+		newTable.url = dataJson.data[i].url;
+		newTable.count = dataJson.data[i].goodsCount;
+		newTable.from = "下拉词";
+		newTable.level = level;
+		
+		..table.push(faTable, newTable);
+	};
+	return faTable; 
+};
+
+//嵌套搜索
+allKeySearch = function(keyWord){
+	var faTable = keyWordSearch(keyWord, 1);
+	for (s=1;..table.len(faTable);1){
+		var key = faTable[s].key
+		var newTable2 = keyWordSearch(key, 2);
+		for (number, tables in newTable2){
+			..table.push(faTable, tables);
+		};
+	};
+	..console.dumpJson(faTable);
+	return faTable
+}
+

@@ -1,0 +1,53 @@
+import win.ui;
+import lao.vipShop;
+import lao.amazon;
+import lao.tao.get;
+/*DSG{{*/
+mainForm = win.form(text="aardio form";right=973;bottom=619)
+mainForm.add(
+button={cls="button";text="唯品会类目挖掘";left=227;top=192;right=340;bottom=264;z=1};
+button2={cls="button";text="唯品会商品类目表";left=375;top=196;right=496;bottom=263;z=2};
+button3={cls="button";text="亚马逊关键词挖掘";left=230;top=294;right=340;bottom=369;z=3};
+button4={cls="button";text="亚马逊关键词挖掘(筛选)";left=371;top=294;right=532;bottom=368;z=4};
+button5={cls="button";text="亚马逊搜索挖掘";left=561;top=294;right=674;bottom=369;z=5};
+button6={cls="button";text="淘宝\天猫关键词搜索";left=230;top=401;right=410;bottom=464;z=6}
+)
+/*}}*/
+
+mainForm.button.oncommand = function(id,event){
+    //唯品会类目挖掘,接受的关键词必须在商品类目中
+	..lao.vipShop.commodityGet("长袖连衣裙");;
+}
+
+mainForm.button2.oncommand = function(id,event){
+    //查看唯品会类目表
+	var categoryTable = ..lao.vipShop.categoryGet();
+	..console.dumpJson(categoryTable);
+}
+
+mainForm.button3.oncommand = function(id,event){
+    //亚马逊关键词挖掘
+	..lao.amazon.getCommodityInfo("python");
+}
+
+mainForm.button4.oncommand = function(id,event){
+    //亚马逊关键词挖掘筛选
+	..lao.amazon.amazonFilter("实践");
+}
+
+mainForm.button5.oncommand = function(id,event){
+    //亚马逊搜索挖掘
+	..lao.amazon.amazonCommoditySearch("python", 1);
+}
+
+mainForm.button6.oncommand = function(id,event){
+// 多页排名数据爬取  keyWord(关键词)，searchType(排序方式), page(查询页数), low(价格区间最小值), high(价格区间最大值), location(地域名 如"浙江 杭州",
+// shopType("是否只搜天猫(tmall/0)")), globalbuy(是否仅搜索海外商品,(1/0)), isNew(是否搜索新品(0/auction_tag%5B%5D=1154))
+	..lao.tao.get.getPagesData("鞋子");
+};
+
+
+mainForm.enableDpiScaling();
+mainForm.show();
+
+return win.loopMessage();

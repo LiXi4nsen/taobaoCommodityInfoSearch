@@ -1,0 +1,82 @@
+﻿import lao;
+import lao.tao;
+import console;
+import time;
+import inet.url
+import web.json
+import web.mshtml
+namespace lao.ymatou
+
+
+//洋码头关键词挖掘
+keyWordSearch = function(keyWord, level=1){
+	var http = ..lao.httpFun();
+	var targetUrl = ..string.concat("https://www.ymatou.com/products/api/getPreKeywordList?callback=&query=", ..inet.url.encode(keyWord), "&_=1537169957630");
+	..console.log(targetUrl);
+	var dataHtml = http.get(targetUrl);
+
+	var dataJson = ..web.json.parse(dataHtml);
+
+	var faTable = {};
+	for (i=1;..table.len(dataJson.result.Keywords);1){
+		var newTable = {};
+		newTable.root = keyWord;
+		newTable.key = dataJson.result.Keywords[i];
+		newTable.from = "下拉词";
+		newTable.level = 1;
+		
+		..table.push(faTable, newTable);
+	};
+	..console.dumpJson(faTable);
+	return faTable; 
+};
+
+
+//洋码头搜索挖掘
+ymatouSearch = function(keyWord, page=1){
+	var http = ..lao.httpFun();
+	var targetUrl = ..string.concat("https://www.ymatou.com/products/api/getProductListByCondition?copuonCode=&keyword=", ..inet.url.encode(keyWord),"&pageIndex=", page);
+	var dataHtml = http.get(targetUrl);
+	var dataJson = ..web.json.parse(dataHtml);
+	..console.log(targetUrl)
+	
+	var faTable = {};
+	for (i=1;..table.len(dataJson.result.Products);1){
+		var newTable = {};
+		newTable.page = page;
+		newTable.number = i;
+		newTable.title = dataJson.result.Products[i].Title;
+		newTable.level = level;
+		newTable.productID = dataJson.result.Products[i].ProductId;
+		newTable.validStart = dataJson.result.Products[i].ValidStart;
+		newTable.validEnd = dataJson.result.Products[i].ValidEnd;
+		newTable.maxPrice = dataJson.result.Products[i].MaxPrice;
+		newTable.minPrice = dataJson.result.Products[i].MinPrice;
+		newTable.prodID = dataJson.result.Products[i].ProdId;
+		newTable.sellerName = dataJson.result.Products[i].SellerName;
+		newTable.sellerID = dataJson.result.Products[i].SellerId;
+		newTable.sellerLevel = dataJson.result.Products[i].SellerLevel;
+		newTable.stock = dataJson.result.Products[i].Stock;
+		newTable.countryName = dataJson.result.Products[i].CountryName;
+		newTable.dsrPoint = dataJson.result.Products[i].dsrPoint;
+		newTable.deliveryPoint = dataJson.result.Products[i].deliveryPoint;
+		newTable.servicePoint = dataJson.result.Products[i].servicePoint;
+		
+		..table.push(faTable, newTable);
+	}; 
+	return faTable;
+};
+//多页搜索
+pagesSearch = function(keyWord, page){
+	var faTable = {};
+	
+	for (i=1;tonumber(page);1){
+		var newTable = ymatouSearch(keyWord, i);
+		for (number,tables in newTable){
+			..table.push(faTable, tables);
+		}
+	};
+	..console.dumpJson(faTable);
+	return faTable;
+}
+

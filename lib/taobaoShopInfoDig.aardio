@@ -1,0 +1,125 @@
+﻿import lao;
+import fsys;
+namespace taobaoShopInfoDig;
+
+
+//淘宝商铺信息挖掘
+//keyWord（关键词）page（20的整数倍）shopType（钻级/星级/皇冠）sortType（综合排序/销量排序/信用排序）searchType（纯关键词/店铺名/旺旺名）
+taobaoShopInfoDig = function(page, parameterList){
+    //初始化参数
+    var keyWord = parameterList.keyWord;
+    var page = page;
+    var shopType = parameterList.shopType;
+    var sortType = parameterList.sortType;
+    var isDiantaoLow = parameterList.isDiantaoLow;
+    var isDiantaoHigh = parameterList.isDiantaoHigh;
+    var saleLow = parameterList.saleLow;
+    var saleHigh = parameterList.saleHigh;
+    //下载页面
+	var http = ..lao.httpFun();
+	var shopsUrl = ..string.concat("https://shopsearch.taobao.com/search?data-key=s&data-value=", tonumber(page-1) * 20,"&ajax=true&_ksTS=1_692&callback=&app=shopsearch&q=", ..inet.url.encode(keyWord),"&commend=all&search_type=", searchType,"&initiative_id=tbindexz_20181012&isb=0&ratesum=", shopType,"&sort=",sortType);
+	..console.log(shopsUrl)
+	var html = http.get(shopsUrl);
+	var faTable = {};
+	
+	while(html == ""){
+		..console.log("请求中")
+		..sleep(100)
+		html = http.get(shopsUrl);
+	}
+	//提取json数据
+	var json = ..web.json.parse(html);
+	//循环获取数据
+	for (num, shop in json.mods.shoplist.data.shopItems){
+		var shopInfo = {};
+		shopInfo.number =  tonumber(page-1) * 20 + num;
+		shopInfo.shopName = shop.title;
+		shopInfo.nickName = shop.nick;
+		shopInfo.totalsold = shop.totalsold;
+		shopInfo.goodsNumber = shop.procnt;
+		if (tonumber(isDiantaoLow) < tonumber(shop.totalsold) and tonumber(shop.totalsold) < tonumber(isDiantaoHigh)){
+			shopInfo.isDiantao = "是";
+		}
+		else {
+			shopInfo.isDiantao = "否";
+		}
+		shopInfo.isCuntao = "";
+		shopInfo.url = ..string.concat("https:", shop.shopUrl);
+		shopInfo.level = shop.shopIcon.iconClass;
+		shopInfo.gotLinks = "查询中"
+
+		if (tonumber(saleLow) < tonumber(shop.totalsold) and tonumber(shop.totalsold) < tonumber(saleHigh)){
+			..string.save("/店铺链接.txt", shopInfo.url + '\r\n', true) //我们创建一个txt文档来做测试
+
+			..table.push(faTable, shopInfo);
+		}
+	}
+	return faTable;
+}
+
+//单页宝贝信息查询
+taobaoGoodsInfoDig = function(nickName, page, parameterList){
+    //初始化数据
+    var priceLow = parameterList.priceLow;
+    var priceHigh = parameterList.priceHigh;
+    var goodsSelectWord = parameterList.goodsSelectWord;
+    var isSaveInOne = parameterList.isSaveInOne
+    var isSaveMoreInfo = parameterList.isSaveMoreInfo
+    ..console.log(isSaveMoreInfo)
+    //下载页面
+	var http = ..lao.httpFun();
+	var goodsUrl = ..string.concat("https://s.m.taobao.com/search?m=api4h5&nick=", ..inet.url.encode(nickName), "&n=40&page=", page, "&sort=", "_sale")
+	var html = http.get(goodsUrl);
+	var json = ..web.json.parse(html);
+	var faTable = {};
+	//循环获取数据
+	for (num, goods in json.listItem){
+		var goodsTable = {};
+		goodsTable.title = goods.title;
+		goodsTable.price = goods.price;
+		goodsTable.sold = goods.sold;
+		goodsTable.url = ..string.concat("https:" + goods.url);
+		//根据条件筛选数据
+		if (tonumber(goods.price) > tonumber(priceLow) and tonumber(goods.price) < tonumber(priceHigh)){
+			if (..string.find(goods.title, goodsSelectWord)){
+				..table.push(faTable, goodsTable);
+				//保存格式化的数据
+				if (isSaveMoreInfo == "仅商品保存链接"){
+					if (isSaveInOne == "保存在一个文件里"){
+						..string.save("/结果目录/今日总数据.txt", goodsTable.url + '\r\n', true);
+					};
+					else {
+						..string.save("/结果目录/"+nickName+".txt", goodsTable.url + '\r\n', true);
+					}
+				};
+				else {
+					if (isSaveInOne == "保存在一个文件里"){
+						..string.save("/结果目录/今日总数据.txt", goodsTable.url + " " + goodsTable.title + " " + goodsTable.sold + " " + goodsTable.price + " " + '\r\n', true);
+					};
+					else {
+						..string.save("/结果目录/"+nickName+".txt", goodsTable.url + '\r\n', true);
+					}
+				}
+			};	
+		};
+	};
+	return faTable
+}
+
+//全部宝贝信息查询
+taobaoAllGoodsInfoDig = function(nickName){
+	var http = ..lao.httpFun();
+	var firstPage = 1;
+	var goodsUrl = ..string.concat("https://s.m.taobao.com/search?m=api4h5&nick=", ..inet.url.encode(nickName), "&n=40&page=", firstPage, "&sort=", "_sale")
+	var html = http.get(goodsUrl);
+	
+	while(html == ""){
+		..console.log("请求中")
+		..sleep(100)
+		html = http.get(goodsUrl);
+	}
+	
+	var json = ..web.json.parse(html);
+	var perPage = json.totalPage;
+	return perPage
+}

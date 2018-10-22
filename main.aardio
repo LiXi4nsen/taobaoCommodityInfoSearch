@@ -1,0 +1,343 @@
+import win.ui;
+import carl.ctrl.listviewex;
+import taobaoShopInfoDig;
+import fsys;
+import lao;
+import process;
+/*DSG{{*/
+winform = win.form(text="aardio form";right=1188;bottom=683)
+winform.add(
+button2={cls="button";text="终止查询";left=832;top=152;right=911;bottom=182;disabled=1;z=25};
+button3={cls="button";text="开始查询";left=706;top=152;right=785;bottom=182;disabled=1;z=27};
+button4={cls="button";text="导出店铺链接";left=1087;top=151;right=1166;bottom=181;disabled=1;z=38};
+button5={cls="button";text="打开目录结果";left=706;top=192;right=785;bottom=222;disabled=1;z=39};
+button6={cls="button";text="清空今日目录";left=833;top=192;right=912;bottom=222;disabled=1;z=40};
+button8={cls="button";text="清空结果";left=960;top=151;right=1039;bottom=181;disabled=1;z=41};
+checkbox={cls="checkbox";text="checkbox";left=328;top=165;right=346;bottom=186;z=28};
+checkbox3={cls="checkbox";text="checkbox3";left=664;top=165;right=682;bottom=186;checked=1;z=32};
+combobox={cls="combobox";left=315;top=29;right=453;bottom=50;edge=1;items={"钻石店";"皇冠店";"金冠店";"心级店"};mode="dropdownlist";z=6};
+combobox2={cls="combobox";left=315;top=63;right=453;bottom=84;edge=1;items={"综合排序";"销量排序";"信用排序"};mode="dropdownlist";z=8};
+combobox3={cls="combobox";left=545;top=29;right=683;bottom=50;edge=1;items={"1";"2";"3";"4";"5";"6";"7";"8";"9";"10"};mode="dropdownlist";z=10};
+combobox4={cls="combobox";left=545;top=63;right=683;bottom=84;edge=1;items={"纯关键词";"旺旺名";"店铺名"};mode="dropdownlist";z=12};
+combobox6={cls="combobox";left=822;top=28;right=987;bottom=49;edge=1;items={"按卖家昵称分开保存";"保存在一个文件里"};mode="dropdownlist";z=34};
+combobox8={cls="combobox";left=999;top=28;right=1164;bottom=49;edge=1;items={"仅商品保存链接";"保存链接\名字\售价\销量"};mode="dropdownlist";z=35};
+edit={cls="edit";left=823;top=66;right=1165;bottom=87;edge=1;readonly=1;z=37};
+edit3={cls="edit";text="1";left=315;top=94;right=370;bottom=115;edge=1;z=14};
+edit4={cls="edit";text="999";left=398;top=94;right=453;bottom=115;edge=1;z=16};
+edit5={cls="edit";text="10";left=544;top=94;right=599;bottom=115;edge=1;z=18};
+edit6={cls="edit";text="999999";left=627;top=94;right=682;bottom=115;edge=1;z=20};
+edit7={cls="edit";text="6000";left=544;top=130;right=599;bottom=151;edge=1;z=22};
+edit8={cls="edit";text="30000";left=627;top=130;right=682;bottom=151;edge=1;z=24};
+edit9={cls="edit";left=424;top=196;right=682;bottom=217;edge=1;z=43};
+groupbox={cls="groupbox";text="关键词";left=12;top=7;right=213;bottom=239;edge=1;z=1};
+groupbox2={cls="groupbox";text="关键词筛选区";left=218;top=7;right=690;bottom=239;edge=1;z=4};
+groupbox3={cls="groupbox";text="黑名单区";left=12;top=237;right=1178;bottom=321;edge=1;z=30};
+groupbox4={cls="groupbox";text="结果筛选区";left=696;top=6;right=1180;bottom=238;edge=1;z=2};
+listviews={cls="listviewex";left=12;top=332;right=1181;bottom=676;color=255;edge=1;z=42};
+richedit={cls="richedit";text="鞋子";left=20;top=20;right=205;bottom=231;edge=1;multiline=1;z=3};
+static={cls="static";text="店铺类型：";left=229;top=29;right=315;bottom=50;font=LOGFONT(name='黑体';h=-16);transparent=1;z=5};
+static10={cls="static";text="是否店淘  (销量在设置区间内视为店淘)：";left=230;top=131;right=542;bottom=152;font=LOGFONT(name='黑体';h=-16);transparent=1;z=21};
+static11={cls="static";text="<";left=608;top=130;right=644;bottom=151;font=LOGFONT(name='黑体';h=-16);transparent=1;z=23};
+static12={cls="static";text="商品中需要包含的关键字：";left=230;top=196;right=450;bottom=217;font=LOGFONT(name='黑体';h=-16);transparent=1;z=29};
+static13={cls="static";text="分析商品信息：";left=538;top=165;right=651;bottom=186;font=LOGFONT(name='黑体';h=-16);transparent=1;z=31};
+static14={cls="static";text="文本保存方式：";left=705;top=29;right=836;bottom=50;font=LOGFONT(name='黑体';h=-16);transparent=1;z=33};
+static15={cls="static";text="保存文本路径：";left=705;top=66;right=836;bottom=87;font=LOGFONT(name='黑体';h=-16);transparent=1;z=36};
+static2={cls="static";text="搜索排序：";left=229;top=63;right=315;bottom=84;font=LOGFONT(name='黑体';h=-16);transparent=1;z=7};
+static3={cls="static";text="查询页数：";left=459;top=29;right=545;bottom=50;font=LOGFONT(name='黑体';h=-16);transparent=1;z=9};
+static4={cls="static";text="搜索类型：";left=459;top=63;right=545;bottom=84;font=LOGFONT(name='黑体';h=-16);transparent=1;z=11};
+static5={cls="static";text="是否村淘：";left=230;top=165;right=316;bottom=186;font=LOGFONT(name='黑体';h=-16);transparent=1;z=26};
+static6={cls="static";text="价格区间：";left=229;top=94;right=315;bottom=115;font=LOGFONT(name='黑体';h=-16);transparent=1;z=13};
+static7={cls="static";text="<";left=379;top=95;right=415;bottom=116;font=LOGFONT(name='黑体';h=-16);transparent=1;z=15};
+static8={cls="static";text="销量区间：";left=458;top=94;right=544;bottom=115;font=LOGFONT(name='黑体';h=-16);transparent=1;z=17};
+static9={cls="static";text="<";left=608;top=94;right=644;bottom=115;font=LOGFONT(name='黑体';h=-16);transparent=1;z=19}
+)
+/*}}*/
+
+//初始化控件
+winform.listview = winform.listviews.listview;
+winform.edit.appendText(..fsys.appdata("/结果目录"))
+
+winform.listview.onnotify = function(id,code,ptr){
+	winform.listviews.openonnotify(id,code,ptr);
+}
+//添加表头
+var headTable = {
+	{key="number"; name="序号"; len=60};
+	{key="shopName"; name="店铺名称"; len=80};
+    {key="nickName"; name="卖家旺旺"; len=80};
+    {key="totalsold"; name="整店销量"; len=80};
+    {key="goodsNumber"; name="宝贝数量"; len=80};
+    {key="isDiantao"; name="是否店淘"; len=80};
+    {key="gotLinks"; name="已提取链接"; len=80};
+    {key="url"; name="网店链接"; len=80};
+    {key="level"; name="店铺等级"; len=80};
+    {key="pageNum"; name="是否村淘"; len=80};
+}
+winform.listviews.addHead(headTable);
+winform.listviews.setRowHeight = 10;
+
+//定义控件禁用函数
+var disableFun = function(order){
+    ..console.log(order)
+	var widgetTable = {
+		stopButton = winform.button2;
+		startButton = winform.button3;
+		getLinksButton = winform.button4;
+		openResultButton = winform.button5;
+		cleanTodayButton = winform.button6;
+		mergeTodayButton = winform.button7;
+		cleanResultButton = winform.button8;
+		isCuntaoCheck = winform.checkbox;
+		isSearchGoodsCheck = winform.checkbox3;
+		shopTypeCombo = winform.combobox;
+		sortTypeCombo = winform.combobox2;
+		pageCombo = winform.combobox3;
+		searchTypeCombo = winform.combobox4;
+		combobox6 = winform.combobox6;
+		combobox8 = winform.combobox8;
+		saveResultEdit = winform.edit;
+		priceLowEdit = winform.edit3;
+		priceHighEdit = winform.edit4;
+		soldLowEdit = winform.edit5;
+		soldHighEdit = winform.edit6;
+		isDiantaoLowEdit = winform.edit7;
+		isDiantaoHighEdit = winform.edit8;
+		resultSelectEdit = winform.edit9;
+		keyWord = winform.richedit;
+	};
+	
+	if(order == "start"){
+		
+		widgetTable.startButton.disabled = 1;
+		widgetTable.getLinksButton.disabled = 1;
+		widgetTable.openResultButton.disabled = 1;
+		widgetTable.cleanTodayButton.disabled = 1;
+		widgetTable.cleanResultButton.disabled = 1;
+		widgetTable.isCuntaoCheck.disabled = 1;
+		widgetTable.isSearchGoodsCheck.disabled = 1;
+		widgetTable.shopTypeCombo.disabled = 1;
+		widgetTable.sortTypeCombo.disabled = 1;
+		widgetTable.pageCombo.disabled = 1;
+		widgetTable.searchTypeCombo.disabled = 1;
+		widgetTable.combobox6.disabled = 1;
+		widgetTable.combobox8.disabled = 1;
+		widgetTable.saveResultEdit.disabled = 1;
+		widgetTable.priceLowEdit.disabled = 1;
+		widgetTable.priceHighEdit.disabled = 1;
+		widgetTable.soldLowEdit.disabled = 1;
+		widgetTable.soldHighEdit.disabled = 1;
+		widgetTable.isDiantaoLowEdit.disabled = 1;
+		widgetTable.isDiantaoHighEdit.disabled = 1;
+		widgetTable.resultSelectEdit.disabled = 1;
+		widgetTable.keyWord.disabled = 1;
+		
+		widgetTable.stopButton.disabled = 0;
+	};
+	else {
+		
+		widgetTable.startButton.disabled = 0;
+		widgetTable.getLinksButton.disabled = 0;
+		widgetTable.openResultButton.disabled = 0;
+		widgetTable.cleanTodayButton.disabled = 0;
+		widgetTable.cleanResultButton.disabled = 0;
+		widgetTable.isCuntaoCheck.disabled = 0;
+		widgetTable.isSearchGoodsCheck.disabled = 0;
+		widgetTable.shopTypeCombo.disabled = 0;
+		widgetTable.sortTypeCombo.disabled = 0;
+		widgetTable.pageCombo.disabled = 0;
+		widgetTable.searchTypeCombo.disabled = 0;
+		widgetTable.combobox6.disabled = 0;
+		widgetTable.combobox8.disabled = 0;
+		widgetTable.saveResultEdit.disabled = 0;
+		widgetTable.priceLowEdit.disabled = 0;
+		widgetTable.priceHighEdit.disabled = 0;
+		widgetTable.soldLowEdit.disabled = 0;
+		widgetTable.soldHighEdit.disabled = 0;
+		widgetTable.isDiantaoLowEdit.disabled = 0;
+		widgetTable.isDiantaoHighEdit.disabled = 0;
+		widgetTable.resultSelectEdit.disabled = 0;
+		widgetTable.keyWord.disabled = 0;
+		
+		widgetTable.stopButton.disabled = 1;
+	}; 
+	
+	
+};
+
+//定义参数筛选函数
+var selectParameter = function(inputParameter){
+    
+    var parameterTable = {
+    	钻石店 = "zhuan";
+    	金冠店 = "jin";
+    	皇冠店 = "huang";
+    	心级店 = "xin";
+    	综合排序 = "default";
+    	销量排序 = "sale-desc";
+    	信用排序 = "credit-desc";	
+    };
+    
+    return parameterTable.inputParameter; 
+}
+
+//定义辅助线程
+import thread.command
+var listen = thread.command()
+//显示数据线程
+listen.showListData = function(faTable){
+	winform.listviews.showData(faTable)
+}
+//消息提示线程
+listen.msgRemind = function(msg){
+	winform.msgbox(msg,"温馨提示");
+	disableFun("end")
+}
+listen.processRemind = function(text){
+	winform.prompt.text = text;
+}
+//写入商品链接数量线程
+listen.writeGoods = function(links, number){
+	winform.listviews.setItemText(links,tonumber(number), 7);	
+}
+
+
+//查询店铺函数
+var startSearching = function(parameterList){
+	import taobaoShopInfoDig;
+	import thread.command;
+	
+	var page = tonumber(parameterList.page);
+
+	for (num=1; tonumber(page);1){
+		var faTable = taobaoShopInfoDig.taobaoShopInfoDig(num, parameterList);
+		thread.command.showListData(faTable);
+	};
+}
+
+//查询商品函数
+var getGoods = function(parameterList){	
+	import taobaoShopInfoDig;
+	import thread.command;
+	var page = parameterList.page;
+	var faTable = {};
+	..console.log(disableFun)
+	
+	..console.log("ok")
+	
+	for (num=1; tonumber(page);1){
+		var goodsTable = taobaoShopInfoDig.taobaoShopInfoDig(num, parameterList)
+		for (num, goods in goodsTable){
+			..table.push(faTable, goods);
+		}
+	}
+	
+	
+	..console.dumpJson(faTable)
+	for (num, shopTable in faTable){
+		var number = shopTable.number;
+		var nick = shopTable.nickName;
+		var perPage = taobaoShopInfoDig.taobaoAllGoodsInfoDig(nick)
+		var links = 0
+		
+		for (num=1;tonumber(perPage);1){
+			var page = num;
+			var pageTable = taobaoShopInfoDig.taobaoGoodsInfoDig(nick, page, parameterList);
+			links = links + ..table.len(pageTable);
+			thread.command.writeGoods(links, number);
+		};
+	};
+	thread.command.msgRemind("查询完毕");  
+};
+
+
+
+//开始查询
+winform.button3.oncommand = function(id,event){
+    import taobaoShopInfoDig;
+    
+    disableFun("start")
+
+    winform.listviews.clearRow();
+    
+    var parameterList = {
+    	keyWord = winform.richedit.text;
+    	shopType = selectParameter(winform.combobox.text);
+		sortType = selectParameter(winform.combobox2.text);
+		goodsSelectWord = winform.edit9.text;
+		page = winform.combobox3.text;
+		searchType = winform.combobox4.text;
+		priceLow = winform.edit3.text;
+		priceHigh = winform.edit4.text;
+		saleLow = winform.edit5.text;
+		saleHigh = winform.edit6.text;
+		isDiantaoLow = winform.edit7.text;
+		isDiantaoHigh = winform.edit8.text;
+		isCuntao = winform.checkbox.checked;
+		isSearchGoods = winform.checkbox3.checked;
+		isSaveInOne = winform.combobox6.text;
+		isSaveMoreInfo = winform.combobox8.text;
+    };
+
+	
+	
+	//开启查询线程
+	startShopSearch = thread.create(startSearching, parameterList)
+	startShopSearchID = thread.getId(startShopSearch);
+	
+	if (parameterList.isSearchGoods){
+		startGoodsSearch = thread.create(getGoods,parameterList)
+		startGoodsSearchID = thread.getId(startGoodsSearch);
+	}
+	
+	
+};
+
+//提取店铺链接
+winform.button4.oncommand = function(id,event){
+	process.explore_select("/店铺链接.txt")
+}
+
+//打开结果目录
+winform.button5.oncommand = function(id,event){
+	//..fsys.dlg.opendir("/结果目录")
+	//..fsys.dlg.open("/结果目录", "/同行数据采集")
+
+	process.explore_select("/结果目录/_.txt")
+}
+
+//输入关键词
+winform.richedit.oncommand = function(id,event){
+    
+    if (winform.richedit.text != "" ){
+    	winform.button3.disabled = false;
+    } 
+    else {
+    	winform.button3.disabled = 1;
+    } 
+    
+}
+
+//终止查询
+winform.button2.oncommand = function(id,event){
+	//查询结束后解除控件禁用
+    disableFun("end")
+    thread.suspend(startShopSearch);
+    thread.suspend(startGoodsSearch);
+}
+
+//清空结果
+winform.button8.oncommand = function(id,event){
+	winform.listviews.clearRow();
+}
+
+//清空今日目录
+winform.button6.oncommand = function(id,event){
+    ..fsys.delete("/结果目录")
+	..fsys.createDir("/结果目录")
+	..string.save("/结果目录/_.txt", "重要误删" + '\r\n', true)
+}
+
+winform.enableDpiScaling();
+winform.show();
+
+return win.loopMessage();

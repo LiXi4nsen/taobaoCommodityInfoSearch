@@ -1,0 +1,92 @@
+﻿import lao;
+import lao.tao;
+import web.json;
+import console;
+import inet.url;
+import web.script;
+namespace lao.tao.lookupItem;
+
+var titleFun = function(url){
+	var http =..lao.httpFun();//请求html
+	var htmlText = http.get(url);
+	if(!htmlText) return; 
+	var itemId = ..string.match(htmlText,"itemId\:""(\d+)"",");
+	var title = ..string.match(htmlText,"id=""J\_ImgBooth"" alt=""(.+)""\ssrc=");
+	if(!title){
+		title = ..string.match(htmlText,"title\s+\:\s\'(.+)\',\n\s+pic\s+");
+		title=..string.replace(title,"\\","%")
+		title = ..web.script().Run("unescape",title); 
+	}
+	if(!itemId) itemId = ..string.match(htmlText,"id\s+\:\s\'(.+)\',\n\s+title\s+");
+	return title,itemId; 
+}
+//小猪上传助手 查找原宝贝
+rawBabyData = function(url,printFun,Num=3,sleepTime=1000){
+    if(printFun) printFun("开始查询")
+	var http = ..lao.httpFun();
+	var title,itemId = titleFun(url);
+	if(!title or itemId) return; 
+	var urlTitle = ..string.concat("https://s.taobao.com/search?data-key=s&sort=default&data-value=0&ajax=true&callback=jsonp860&q=",..inet.url.encode(title),"&bcoffset=4&ntoffset=4&p4ppushleft=2%2C48");
+	var htmlText1;
+	var numa = Num;
+	do{
+		htmlText1 = http.get(urlTitle);
+		sleep(500)
+		numa--;
+	}while((!htmlText1 or htmlText1 == "") and numa>0)
+	if(!htmlText1) return; 
+	var newText1 = ..string.match(htmlText1,"jsonp860\((.+})\);");
+	var newTable1 = ..web.json.parse(newText1);
+	var s = 0;
+	var table = {}
+	var num = 0;
+	for(k,v in newTable1.mods.itemlist.data.auctions){
+		if(itemId == v.nid){
+			for(i=1;2;1){
+				var url = ..string.concat("https://s.taobao.com/search?type=samestyle&app=i2i&&sort=sale-desc&rec_type=1&uniqpid=",..inet.url.encode(v.pid),"&s=",s);
+				var htmlText;
+				var numb = Num;
+				do{
+					htmlText = http.get(url);
+					sleep(sleepTime)
+					numb--;
+				}while((!htmlText or htmlText == "") and numb>0)
+				if(!htmlText) continue;
+				var itemText = ..string.match(htmlText,"g\_page\_config\s=\s(.+}});");
+				var itemTable = ..web.json.parse(itemText);
+				for(k,v in itemTable.mods.recitem.data.items){
+					num++;
+					if(printFun) printFun("已经找到" ++ num ++ "个原宝贝")
+					var list = {}
+					list.title = v["raw_title"]
+					list.price = v["view_price"]
+					list.itemId = v.nid
+					list.sales = ..string.replace(v["view_sales"],"人付款","")
+					list.shopName = v.nick
+					list.itemImg = ..string.concat("http:",v["pic_url"],"")
+					..table.push(table,list);
+				}
+				if(num < 60) break;
+				s=s+60;	
+			}
+		}
+	}
+	if(printFun) printFun("查询完毕，共找到" ++ num ++ "个原宝贝")
+	return table;
+}
+/*
+imgData = function(itemTable){
+    var http = ..lao.httpFun();
+    var faTable = {};
+	for k,v in itemTable{
+		var itemImg = http.get(v.itemImg)
+		v.itemImg = itemImg
+		..table.push(faTable,v)
+	}
+	return faTable; 
+}
+*/
+
+
+
+

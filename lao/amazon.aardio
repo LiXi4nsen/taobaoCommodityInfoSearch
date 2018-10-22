@@ -1,0 +1,155 @@
+﻿import lao;
+import lao.tao;
+import console;
+import time;
+import inet.url
+import web.json
+import web.mshtml
+namespace lao.amazon
+
+//亚马逊页面下载
+amazonSearch = function(keyWord){
+	var http = ..lao.httpFun();	
+	var targetUrl = ..string.concat("https://completion.amazon.cn/search/complete?method=completion&q=", ..inet.url.encode(keyWord),"&search-alias=aps&client=amazon-search-ui-mobile&mkt=3240");
+	var dataHtml = http.get(targetUrl);
+	var dataJson = ..web.json.parse(dataHtml);
+	var perPage = ..table.len(dataJson[2]);
+	//返回页面下拉词信息和下拉词数量
+	return dataJson[2], perPage;
+}
+;
+//商品信息获取
+dataGet = function(keyWord){
+    //调用下载函数，获取下拉词信息和下拉词数量
+	var dataTable, perPage = amazonSearch(keyWord);
+	var faTable = {};
+	//循环获取一级关键词信息
+	for (i=1;perPage;1){
+		var newTable = {};
+		newTable.root = keyWord;
+		newTable.key = dataTable[i];
+		newTable.comeFrom = "下拉词";
+		newTable.level = "1";
+		
+		..table.push(faTable, newTable);
+		
+		var dataTable2, perPage2 = amazonSearch(newTable.key);
+		//循环获取二级关键词信息
+		for (s=1;perPage2;1){
+			var newTable2 = {};
+			newTable2.root = newTable.key;
+			newTable2.key = dataTable2[s];
+			newTable2.comeFrom = "下拉词";
+			newTable2.level = "2";
+			
+			..table.push(faTable, newTable2);
+		}; 
+	};
+	..console.dumpJson(faTable);
+	return faTable;
+};
+
+//获取关键词包含商品数量
+getCommodityInfo = function(keyWord){
+    //调用商品信息获取函数
+    var faTable = dataGet(keyWord);
+	var http = ..lao.httpFun();
+	..console.log(..table.len(faTable));
+	//循环访问下载关键词搜索页面
+	for (o=1;..table.len(faTable);1){
+		var commodityName = faTable[o].key;
+		var commodityUrl = ..string.concat("https://www.amazon.cn/mn/search/ajax/ref=nb_sb_noss?__mk_zh_CN=亚马逊网站&url=search-alias=aps&field-keywords=", commodityName,"&rh=i:aps,k:", commodityName,"&fromHash=/ref=nb_sb_noss_1?__mk_zh_CN=亚马逊网站&url=search-alias=aps&field-keywords=", commodityName,"&rh=i:aps,k:", commodityName, "&section=ATF,BTF&fromApp=gp/search&fromPage=results&fromPageConstruction=auisearch&version=2&oqid=1536558664&atfLayout=grid");
+		var commodityHtml = http.get(commodityUrl);
+		//..console.log(commodityHtml);
+		//如果下载失败，则循环下载
+		while (commodityHtml == false){
+			commodityHtml = http.get(commodityUrl);
+			..console.log("下载页面中...");
+			..sleep(1000);
+		};
+		//格式化页面数据
+		commodityHtml = ..string.replace(commodityHtml, "\n", "");
+		commodityHtml = ..string.replace(commodityHtml, "@}&&&{", ",");
+		commodityHtml = ..string.replace(commodityHtml, "@&&&", "");
+		
+		//..console.log(commodityUrl);
+		
+		var commodityJson = ..web.json.parse(commodityHtml);
+		//页面数据分为两种格式，进行判断并获取关键词包含商品数量
+		if (commodityJson.topDynamicContent){
+			var tag = commodityJson.topDynamicContent.data.value;
+			tag = ..string.replace(tag, "\,", "");
+			var number = ..string.match(tag, "过(\d+)条");
+			..console.log("查询中...");
+			faTable[o].number = number;
+		}
+		elseif(commodityJson.ajaxDataRhs){
+			var tag = commodityJson.ajaxDataRhs.data.value;
+			tag = ..string.replace(tag, "\,", "");
+			var number = ..string.match(tag, "共(\d+)条");
+			..console.log("查询中...");
+			faTable[o].number = number;
+		}
+		//如果关键词查询失败，则将赋值为"unkown"
+		else {
+			var number = "unkown";
+			..console.log("查询中...");
+			faTable[o].number = number;
+		};
+		..console.dumpJson(faTable[o]);
+	};
+	//将包含数据的table赋值给全局变量blobalTable，方便后续功能调用,可用数据库替代
+	globalTable = faTable;
+	..console.dumpJson(faTable);
+	return faTable;
+};
+
+//关键词筛选
+amazonFilter = function(conditionWord){
+    //循环全局变量globalTable包含的关键词,并与用户传入的筛选词进行匹配
+    var faTable = {};
+	for (k, v in globalTable){
+		//若匹配失败，则删除该条数据
+		if (..string.indexOf(v.key, conditionWord) == false){
+			v = null;
+		};
+	};
+	..console.dumpJson(faTable);
+	return faTable;
+};
+
+
+//亚马逊搜索挖掘
+amazonCommoditySearch = function(keyWord, pages=1){
+	var http = ..lao.httpFun();
+	var faTable = {};
+	for (page=1;pages;1){
+		var targetUrl = ..string.concat("https://www.amazon.cn/gp/aw/s/ref=is_pg_1_2?rh=i%3Aaps%2Ck%3A", ..inet.url.encode(keyWord), "&keywords=", ..inet.url.encode(keyWord), "&ie=UTF8&qid=1536803933&page=", page);
+		var dataHtml = http.down(targetUrl);;
+		while (dataHtml == false){
+			dataHtml = http.get(targetUrl);
+			..console.log("下载页面中");
+			..sleep(1000);
+		};
+		//..string.save("C:\Users\Administrator\Desktop\parse.txt", dataHtml, true)
+		
+		/*var commodityUrlTable = ..string.matches(dataHtml, "\</span\>
+    \<a href=""(.+?)""");
+    	var commodityNameTable = ..string.matches(dataHtml, """\>(.+?)\</a\>\</span\>\<br /\>\<span class=""author""\>");*/
+    	dataHtml = ..string.replace(dataHtml, "\n", "");
+    	var targetHtml = ..string.matches(dataHtml, "\<span class=""itemListNumber""\>(.+?)\<span class=""numReviews""\>");
+    	
+    	for (commodity=1;5;1){
+    		var newTable = {};
+    		newTable.time = ..time.now();
+    		newTable.number = ..string.left(targetHtml[commodity][1], 1);
+    		newTable.title = ..string.match(targetHtml[commodity][1], "\>        (.+?)\</a\>");
+    		newTable.url = ..string.match(targetHtml[commodity][1], "href=""(.+?)""\>");
+    		newTable.cost = ..string.match(targetHtml[commodity][1], "\<span class=""dpOurPrice""\>         (.+?)\</span\>");
+    		
+    		..table.push(faTable, newTable);
+    	};
+		..console.dumpJson(faTable);
+	};
+	return faTable;
+};	
